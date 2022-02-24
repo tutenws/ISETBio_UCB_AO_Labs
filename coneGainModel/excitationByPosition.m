@@ -18,7 +18,7 @@ eccX = 2.0; % In degs
 eccY = 0.0; % In degs
 
 % Irrelevant for now
-propL = 0.55;
+propL = 0.4230;
 propS = 0.06;
 propM = 1-propL-propS;
 LMratio = propL/propM;
@@ -56,7 +56,15 @@ positionVector = minPositionArcmin:spotWidthMinutes:maxPositionArcmin; % Generat
 positionVector = positionVector-min(abs(positionVector)); % Shift the positions to ensure one is centered on zero.
 positionVector(positionVector<minPositionArcmin) = []; % Trim any center positions that fall outside the desired range.
 positionVector(positionVector>maxPositionArcmin) = []; % Trim any center positions that fall outside the desired range.
-[xLocs, yLocs] = meshgrid(positionVector);
+
+doGrid = 1;
+
+if doGrid == 1
+    [xLocs, yLocs] = meshgrid(positionVector);
+else
+    xLocs = positionVector;
+    yLocs = zeros(size(positionVector));
+end
 
 % Other stimulus parameters
 %
@@ -99,19 +107,22 @@ theOI = oiSet(theOI,'optics',opticsNoLca, 'wAngular', fieldSizeDegs); % Update t
 visualizedSpatialSupportArcMin = 2; % Size of displayed PSF, in arc min
 visualizedSpatialSfrequencyCPD = 120; % Max spatial frequency for MTF
 % Visualize the PSF/OTF at the shortest wavelength (diffraction-limited)
-visualizeOptics(theOI, 580, visualizedSpatialSupportArcMin, visualizedSpatialSfrequencyCPD);
+% visualizeOptics(theOI, 580, visualizedSpatialSupportArcMin, visualizedSpatialSfrequencyCPD);
 
 % Visualize the PSF/OTF at the longest wavelength (also diffraction-limited, but MTF
 % should be a little worse "because physics")
-visualizeOptics(theOI, 680, visualizedSpatialSupportArcMin, visualizedSpatialSfrequencyCPD);
+% visualizeOptics(theOI, 680, visualizedSpatialSupportArcMin, visualizedSpatialSfrequencyCPD);
 
+wavelengthVector = 550:10:620; 
 % Pre-allocate for data output
-mConeSum = nan(numel(xLocs),1);
+mConeSum = nan(numel(xLocs),1, length(wavelengthVector));
 lConeSum = mConeSum;
 xPos = mConeSum;
 yPos = mConeSum;
 localNumLCones = mConeSum;
 localNumMCones = mConeSum;
+
+
 
 % Cycle through grid locations
 for j = 1:numel(xLocs)
@@ -124,7 +135,8 @@ for j = 1:numel(xLocs)
     % For now, let's keep our conditions monochromatic rather than trying to
     % model what we actually did, which was to make yellow with a mixture of
     % our red (680 nm) and green (543 nm) primaries
-    spotWavelengthNm = 580;
+    for k = 1:length(wavelengthVector)
+    spotWavelengthNm = wavelengthVector(k);
     spotFWHMNm = 5;
 
     % Create a relative spectrum where the only nonzero value is at the spot
@@ -296,7 +308,7 @@ for j = 1:numel(xLocs)
 
     theConeMosaic.PSF = ConeResponse.psfDiffLmt(pupilDiameterMm);
 
-    coneExcitations = theConeMosaic.computeWithScene(rectScene);
+    coneExcitations(:,j,k) = theConeMosaic.computeWithScene(rectScene);
     
     % coneExcitations = theConeMosaic.compute(theOI);
     % Visualize cone mosaic and its cone excitation responses
@@ -308,19 +320,19 @@ for j = 1:numel(xLocs)
     theConeMosaic.visualizeExcitation();
 
 
-    coneExcitationsBG = theConeMosaic.computeWithScene(rectSceneBG);
+    coneExcitationsBG(:,j,k) = theConeMosaic.computeWithScene(rectSceneBG);
 
-    coneExcitationsDiff = coneExcitations-coneExcitationsBG;
-    kmeansIDX = kmeans(coneExcitationsDiff, 2);
+    coneExcitationsDiff(:,j,k) = coneExcitations(:,j,k)-coneExcitationsBG(:,j,k);
+    kmeansIDX = kmeans(coneExcitationsDiff(:,j,k), 2);
 
     % Visualize pattern of cone excitation
     %     theConeMosaic.visualizeExcitation();
     % Pre-allocate for data output
-    mConeSum(j,1)  = sum(coneExcitations(theConeMosaic.Mosaic.mConeIndices)-coneExcitationsBG(theConeMosaic.Mosaic.mConeIndices));
-    lConeSum(j,1) =  sum(coneExcitations(theConeMosaic.Mosaic.lConeIndices)-coneExcitationsBG(theConeMosaic.Mosaic.lConeIndices));
+    mConeSum(j,1,k)  = sum(coneExcitations(theConeMosaic.Mosaic.mConeIndices,j)-coneExcitationsBG(theConeMosaic.Mosaic.mConeIndices,j));
+    lConeSum(j,1,k) =  sum(coneExcitations(theConeMosaic.Mosaic.lConeIndices,j)-coneExcitationsBG(theConeMosaic.Mosaic.lConeIndices,j));
     
-    xPos(j,1) = xLocs(j);
-    yPos(j,1) = yLocs(j);
+    xPos(j,1,k) = xLocs(j);
+    yPos(j,1,k) = yLocs(j);
 
 %     % Find local cone ratio (within square region)
 %     idx = find(coneRelativeXPositionsArcmin > xPos(j)-(spotWidthMinutes/2) & coneRelativeXPositionsArcmin < xPos(j)+(spotWidthMinutes/2));
@@ -331,12 +343,15 @@ for j = 1:numel(xLocs)
 
     hold on;
     plot(theConeMosaic.Mosaic.coneRFpositionsDegs(id_stim,1),theConeMosaic.Mosaic.coneRFpositionsDegs(id_stim,2), 'b*');
-    localNumLCones(j,1) = length(intersect(theConeMosaic.Mosaic.lConeIndices,id_stim));
-    localNumMCones(j,1) = length(intersect(theConeMosaic.Mosaic.mConeIndices,id_stim));
+    localNumLCones(j,1,k) = length(intersect(theConeMosaic.Mosaic.lConeIndices,id_stim));
+    localNumMCones(j,1,k) = length(intersect(theConeMosaic.Mosaic.mConeIndices,id_stim));
 
+    close(gcf);
 
+    end
 end
 
-figure, plot(lConeSum./mConeSum)
-
-hold on, plot(localNumLCones./localNumMCones)
+% figure, hold on
+% plot(lConeSum./mConeSum)
+% 
+% hold on, plot(localNumLCones./localNumMCones)
