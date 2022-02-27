@@ -91,6 +91,9 @@ monoCalStruct.P_device = monoPDevice;
 monCalObj = ObjectToHandleCalOrCalStruct(origCalStruct);
 
 %% Create matrix that transforms from original display primaries to mono display primaries
+%
+% The matrix we want is M_origToMono.  This operates on primaries for the
+% original display to produce primaries for a monochromatic display.
 M1 = M_PToT(origPDevice,T_cones);
 M2 = M_TToP(T_cones,monoPDevice);
 M_origToMono = M2*M1;
