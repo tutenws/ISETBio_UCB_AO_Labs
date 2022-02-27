@@ -18,6 +18,9 @@
 %      actuality the power of the stimulus was much smaller.
 %
 %      Stimulus luminance, according to Ally, was around 2844 cd/m2.
+%
+%    So, this routine uses the power ratios across the two primaries, but
+%    then scales to 2844 cd/m2 for total spot luminance.
 
 
 %
