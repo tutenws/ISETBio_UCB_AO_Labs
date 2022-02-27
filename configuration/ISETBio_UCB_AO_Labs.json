@@ -4,7 +4,7 @@
 		"hook": "",
 		"importance": "",
 		"localHookTemplate": "",
-		"name": "ISETBioCSFGenerator",
+		"name": "BrainardLabToolbox",
 		"pathPlacement": "append",
 		"subfolder": "",
 		"toolboxRoot": "",
@@ -12,6 +12,19 @@
 		"update": "",
 		"url": ""
 	},
+    {
+		"flavor": "",
+		"hook": "",
+		"importance": "",
+		"localHookTemplate": "",
+		"name": "ISETBioCSFGenerator",
+		"pathPlacement": "append",
+		"subfolder": "",
+		"toolboxRoot": "",
+		"type": "include",
+		"update": "",
+		"url": ""
+	},  
     {
 		"flavor": "",
 		"hook": "",
