@@ -18,7 +18,7 @@ eccX = 2.0; % In degs
 eccY = 0.0; % In degs
 
 % Irrelevant for now
-propL = 0.4230;
+propL = 0.3511;
 propS = 0.06;
 propM = 1-propL-propS;
 LMratio = propL/propM;
@@ -113,7 +113,7 @@ visualizedSpatialSfrequencyCPD = 120; % Max spatial frequency for MTF
 % should be a little worse "because physics")
 % visualizeOptics(theOI, 680, visualizedSpatialSupportArcMin, visualizedSpatialSfrequencyCPD);
 
-wavelengthVector = 550:10:620; 
+wavelengthVector = 550:10:620;
 % Pre-allocate for data output
 mConeSum = nan(numel(xLocs),1, length(wavelengthVector));
 lConeSum = mConeSum;
@@ -136,222 +136,222 @@ for j = 1:numel(xLocs)
     % model what we actually did, which was to make yellow with a mixture of
     % our red (680 nm) and green (543 nm) primaries
     for k = 1:length(wavelengthVector)
-    spotWavelengthNm = wavelengthVector(k);
-    spotFWHMNm = 5;
+        spotWavelengthNm = wavelengthVector(k);
+        spotFWHMNm = 5;
 
-    % Create a relative spectrum where the only nonzero value is at the spot
-    % wavelength
-    relativeSpectrumSpot = zeros(size(wls));
-    wlInd = find(wls==spotWavelengthNm);
-    relativeSpectrumSpot(wlInd) = 1;
+        % Create a relative spectrum where the only nonzero value is at the spot
+        % wavelength
+        relativeSpectrumSpot = zeros(size(wls));
+        wlInd = find(wls==spotWavelengthNm);
+        relativeSpectrumSpot(wlInd) = 1;
 
-    % Go from lumninance to radiance. Radiance comes back using PTB convention
-    % of power per wlband, not power per nm.
-    [spotRadianceWattsM2SrWlband, spotRadianceS] = LumToRadiance(relativeSpectrumSpot, S, spotLuminanceCdM2, 'Photopic');
+        % Go from lumninance to radiance. Radiance comes back using PTB convention
+        % of power per wlband, not power per nm.
+        [spotRadianceWattsM2SrWlband, spotRadianceS] = LumToRadiance(relativeSpectrumSpot, S, spotLuminanceCdM2, 'Photopic');
 
-    % And then go from radiance back out to corneal irradiance given our
-    % field size
-    cornealIrradianceWattsM2Spot = RadianceAndDegrees2ToCornIrradiance(spotRadianceWattsM2SrWlband, fieldSizeDegs2);
+        % And then go from radiance back out to corneal irradiance given our
+        % field size
+        cornealIrradianceWattsM2Spot = RadianceAndDegrees2ToCornIrradiance(spotRadianceWattsM2SrWlband, fieldSizeDegs2);
 
-    % Pass the result at 580 nm in uW to the scene generation code below
-    Mm2ToM2 = 1e-6;
-    WToUW = 1e6;
-    spotIrradianceUWM2Spot = cornealIrradianceWattsM2Spot(wlInd) * WToUW;
-    spotPowerUW = spotIrradianceUWM2Spot*pupilAreaMm2*Mm2ToM2;
+        % Pass the result at 580 nm in uW to the scene generation code below
+        Mm2ToM2 = 1e-6;
+        WToUW = 1e6;
+        spotIrradianceUWM2Spot = cornealIrradianceWattsM2Spot(wlInd) * WToUW;
+        spotPowerUW = spotIrradianceUWM2Spot*pupilAreaMm2*Mm2ToM2;
 
-    % Let's convert spotPower to nW/deg^2, about which DHB has some intutition.
-    % That is, we use about 70 nW/deg^2 in the Penn AOSLO for full power
-    % visible stimulus at 545 nM or so.  The number here comes out ballbark
-    % reasonable.
-    UWToNW = 1000;
-    spotPowerNwDeg2 = spotPowerUW*UWToNW/fieldSizeDegs2;
+        % Let's convert spotPower to nW/deg^2, about which DHB has some intutition.
+        % That is, we use about 70 nW/deg^2 in the Penn AOSLO for full power
+        % visible stimulus at 545 nM or so.  The number here comes out ballbark
+        % reasonable.
+        UWToNW = 1000;
+        spotPowerNwDeg2 = spotPowerUW*UWToNW/fieldSizeDegs2;
 
-    % The underlying routine starts with a background and works in contrast.
-    % To deal with this, we specify a background down from desired power by
-    % some large factor and then take contrast as this factor.  This produces a
-    % spot with desired power and a background of essentially 0.  We'll patch
-    % that up later - doing it this way interfaces to the extant routine and is
-    % a kluge, but one I think we can live with.
-    bgFactor = 5000;
-    spotBgPowerUW = spotPowerUW/bgFactor;
+        % The underlying routine starts with a background and works in contrast.
+        % To deal with this, we specify a background down from desired power by
+        % some large factor and then take contrast as this factor.  This produces a
+        % spot with desired power and a background of essentially 0.  We'll patch
+        % that up later - doing it this way interfaces to the extant routine and is
+        % a kluge, but one I think we can live with.
+        bgFactor = 5000;
+        spotBgPowerUW = spotPowerUW/bgFactor;
 
-    % Convert our parameters to those that matter to the two spot routine.
-    % Using stimAngle of 90 means we only see spot 2, which is drawn second and
-    % thus always over spot 1.
-    stimAngle = 90;
+        % Convert our parameters to those that matter to the two spot routine.
+        % Using stimAngle of 90 means we only see spot 2, which is drawn second and
+        % thus always over spot 1.
+        stimAngle = 90;
 
-    % This is center-to-center separation of the two spots. So with values of
-    % zero they overlap. Because the separation is accomplished by applying
-    % half of it to each underlying spot, we multiply by two to convert
-    % position offsets to separations.  The minus sign makes the sign
-    % convention as described above.
-    spotVerticalSepMinutes = -2*spotVerticalPositionMinutes;
-    spotHorizontalSepMinutes = -2*spotHorizontalPositionMinutes;
+        % This is center-to-center separation of the two spots. So with values of
+        % zero they overlap. Because the separation is accomplished by applying
+        % half of it to each underlying spot, we multiply by two to convert
+        % position offsets to separations.  The minus sign makes the sign
+        % convention as described above.
+        spotVerticalSepMinutes = -2*spotVerticalPositionMinutes;
+        spotHorizontalSepMinutes = -2*spotHorizontalPositionMinutes;
 
-    % Set up two spot params
-    rectParams = struct(...
-        'type', 'basic', ...                            % type
-        'viewingDistanceMeters', 2, ...                 % viewing distance: in meters
-        'wls', 400:10:750, ...                          % wavelength support of the primary SPDs: in nanometers
-        'stimAngle', stimAngle, ...                     % stimulus angle in incr/decr plane
-        'spotWl', spotWavelengthNm, ...                 % spot wavelength: in nm
-        'spotFWHM', spotFWHMNm, ...                     % spot full width at half max: in nm
-        'spotWidthDegs', spotWidthMinutes/60, ...       % spot width: in degrees
-        'spotHeightDegs', spotHeightMinutes/60, ...     % spot height: in degrees
-        'spotVerticalSepDegs', spotVerticalSepMinutes/60 , ... % spot center to center vertical separation: in degrees
-        'spotHorizontalSepDegs', spotHorizontalSepMinutes/60, ... % spot center to center horizontal separation: in degrees
-        'spotBgDegs', fieldSizeDegs, ...                % spot background: in degrees
-        'spotBgPowerUW', spotBgPowerUW, ...             % spot background power: in uW
-        'imagingWl', 750, ...                           % imaging beam wavelength: in nm
-        'imagingFWHM', 20, ...                          % imaging beam full width at half max: in nm
-        'imagingBgPowerUW', 0, ...                      % imaging beam power entering eye: in uW
-        'fovDegs', fieldSizeDegs, ...                   % spatial: full scene field of view, in degrees
-        'pixelsNum', nPixels, ...                       % spatial: desired size of stimulus in pixels
-        'temporalModulation', 'flashed', ...            % temporal modulation mode: choose between {'flashed'}
-        'temporalModulationParams', struct(...          % temporal: modulation params struct
-        'stimOnFrameIndices', [1], ...                %   params relevant to the temporalModulationMode
-        'stimDurationFramesNum', 1), ...              %   params relevant to the temporalModulationMode
-        'frameDurationSeconds', 3/16, ...               % temporal: frame duration, in seconds
-        'pupilDiameterMm', pupilDiameterMm ...          % pupil diameter mm
-        );
+        % Set up two spot params
+        rectParams = struct(...
+            'type', 'basic', ...                            % type
+            'viewingDistanceMeters', 2, ...                 % viewing distance: in meters
+            'wls', 400:10:750, ...                          % wavelength support of the primary SPDs: in nanometers
+            'stimAngle', stimAngle, ...                     % stimulus angle in incr/decr plane
+            'spotWl', spotWavelengthNm, ...                 % spot wavelength: in nm
+            'spotFWHM', spotFWHMNm, ...                     % spot full width at half max: in nm
+            'spotWidthDegs', spotWidthMinutes/60, ...       % spot width: in degrees
+            'spotHeightDegs', spotHeightMinutes/60, ...     % spot height: in degrees
+            'spotVerticalSepDegs', spotVerticalSepMinutes/60 , ... % spot center to center vertical separation: in degrees
+            'spotHorizontalSepDegs', spotHorizontalSepMinutes/60, ... % spot center to center horizontal separation: in degrees
+            'spotBgDegs', fieldSizeDegs, ...                % spot background: in degrees
+            'spotBgPowerUW', spotBgPowerUW, ...             % spot background power: in uW
+            'imagingWl', 750, ...                           % imaging beam wavelength: in nm
+            'imagingFWHM', 20, ...                          % imaging beam full width at half max: in nm
+            'imagingBgPowerUW', 0, ...                      % imaging beam power entering eye: in uW
+            'fovDegs', fieldSizeDegs, ...                   % spatial: full scene field of view, in degrees
+            'pixelsNum', nPixels, ...                       % spatial: desired size of stimulus in pixels
+            'temporalModulation', 'flashed', ...            % temporal modulation mode: choose between {'flashed'}
+            'temporalModulationParams', struct(...          % temporal: modulation params struct
+            'stimOnFrameIndices', [1], ...                %   params relevant to the temporalModulationMode
+            'stimDurationFramesNum', 1), ...              %   params relevant to the temporalModulationMode
+            'frameDurationSeconds', 3/16, ...               % temporal: frame duration, in seconds
+            'pupilDiameterMm', pupilDiameterMm ...          % pupil diameter mm
+            );
 
-    % Create a static two-spot AO scene with a particular incr-decr direction,
-    % and other relevant parameters. This uses compute function handle for
-    % two-spot AO stimuli, as commented above the parameters have been cooked
-    % to make one rectangular spot on a dark background.
-    rectComputeFunction = @sceAOTwoSpot;
+        % Create a static two-spot AO scene with a particular incr-decr direction,
+        % and other relevant parameters. This uses compute function handle for
+        % two-spot AO stimuli, as commented above the parameters have been cooked
+        % to make one rectangular spot on a dark background.
+        rectComputeFunction = @sceAOTwoSpot;
 
-    % Instantiate a sceneEngine with the above sceneComputeFunctionHandle
-    % and the custom params.
-    rectSceneEngine = sceneEngine(rectComputeFunction, rectParams);
+        % Instantiate a sceneEngine with the above sceneComputeFunctionHandle
+        % and the custom params.
+        rectSceneEngine = sceneEngine(rectComputeFunction, rectParams);
 
-    % Create a scene sequence at a particular contrast.  Here there is just one
-    % frame in the returned cell array of scenes. We pull out that first entry.
-    spotContrast = bgFactor*1.0;
-    rectSceneSequence = rectSceneEngine.compute(spotContrast);
-    rectScene = rectSceneSequence{1};
+        % Create a scene sequence at a particular contrast.  Here there is just one
+        % frame in the returned cell array of scenes. We pull out that first entry.
+        spotContrast = bgFactor*1.0;
+        rectSceneSequence = rectSceneEngine.compute(spotContrast);
+        rectScene = rectSceneSequence{1};
 
-    % Create a scene of the background as well.
-    rectSceneSequenceBG = rectSceneEngine.compute(0);
-    rectSceneBG =  rectSceneSequenceBG{1};
-    sceneRadiancePhotonsM2SrSecNmBG = sceneGet(rectSceneBG,'photons');
+        % Create a scene of the background as well.
+        rectSceneSequenceBG = rectSceneEngine.compute(0);
+        rectSceneBG =  rectSceneSequenceBG{1};
+        sceneRadiancePhotonsM2SrSecNmBG = sceneGet(rectSceneBG,'photons');
 
-    % Adjust the background.  First we'll zero out the very
-    % small numbers we put in to be able to specify spot power in the form of a
-    % contrast.
-    sceneRadiancePhotonsM2SrSecNm = sceneGet(rectScene,'photons');
-    maxPhotons = max(sceneRadiancePhotonsM2SrSecNm(:));
-    sceneRadiancePhotonsM2SrSecNm(sceneRadiancePhotonsM2SrSecNm(:) < 4*maxPhotons/bgFactor) = 0;
+        % Adjust the background.  First we'll zero out the very
+        % small numbers we put in to be able to specify spot power in the form of a
+        % contrast.
+        sceneRadiancePhotonsM2SrSecNm = sceneGet(rectScene,'photons');
+        maxPhotons = max(sceneRadiancePhotonsM2SrSecNm(:));
+        sceneRadiancePhotonsM2SrSecNm(sceneRadiancePhotonsM2SrSecNm(:) < 4*maxPhotons/bgFactor) = 0;
 
-    % Now approximate the background, which is effectively metameric to equal
-    % energy white and has a luminance of 26 cd/m2
-    bgLuminanceCdM2 = 26;
+        % Now approximate the background, which is effectively metameric to equal
+        % energy white and has a luminance of 26 cd/m2
+        bgLuminanceCdM2 = 26;
 
-    % Relative spectrum reflects equal energy at all wavelengths (not true, but ok for now)
-    relativeSpectrumBg = ones(size(wls));
-    bgRadianceWattsM2SrSecWlband = LumToRadiance(relativeSpectrumBg, S, bgLuminanceCdM2, 'Photopic');
+        % Relative spectrum reflects equal energy at all wavelengths (not true, but ok for now)
+        relativeSpectrumBg = ones(size(wls));
+        bgRadianceWattsM2SrSecWlband = LumToRadiance(relativeSpectrumBg, S, bgLuminanceCdM2, 'Photopic');
 
-    % Convert to photonsM2SrSecNm, which are the units that ISETBio expects
-    bgRadiancePhotonsM2SrSecWlband = EnergyToQuanta(wls,bgRadianceWattsM2SrSecWlband);
-    bgRadiancePhotonsM2SrSecNm = bgRadiancePhotonsM2SrSecWlband/S(2);
+        % Convert to photonsM2SrSecNm, which are the units that ISETBio expects
+        bgRadiancePhotonsM2SrSecWlband = EnergyToQuanta(wls,bgRadianceWattsM2SrSecWlband);
+        bgRadiancePhotonsM2SrSecNm = bgRadiancePhotonsM2SrSecWlband/S(2);
 
-    % Add background to spot image
-    for ww = 1:length(wls)
-        sceneRadiancePhotonsM2SrSecNm(:,:,ww) = ...
-            sceneRadiancePhotonsM2SrSecNm(:,:,ww) + bgRadiancePhotonsM2SrSecNm(ww);
-    end
-
-    % Push adjusted image back into the scene. Note that default ISETBio scene
-    % is not represented at full double precision.  Setting bit depth to 64
-    % uses double precision which is what we want here.
-    rectScene = sceneSet(rectScene, 'bit depth', 64);
-    rectScene = sceneSet(rectScene,'photons',sceneRadiancePhotonsM2SrSecNm);
-    sceneRadianceCheck = sceneGet(rectScene,'photons');
-    if (max(abs(sceneRadianceCheck(:) - sceneRadiancePhotonsM2SrSecNm(:)))/mean(sceneRadiancePhotonsM2SrSecNm(:)) > 1e-10)
-        error('Failure in scene set');
-    end
-
-    % Push the background image back into the scene as well.
         % Add background to spot image
-    for ww = 1:length(wls)
-        sceneRadiancePhotonsM2SrSecNmBG(:,:,ww) = bgRadiancePhotonsM2SrSecNm(ww);
-    end
-    rectSceneBG = sceneSet(rectSceneBG, 'bit depth', 64);
-    rectSceneBG = sceneSet(rectSceneBG, 'photons', sceneRadiancePhotonsM2SrSecNmBG);
+        for ww = 1:length(wls)
+            sceneRadiancePhotonsM2SrSecNm(:,:,ww) = ...
+                sceneRadiancePhotonsM2SrSecNm(:,:,ww) + bgRadiancePhotonsM2SrSecNm(ww);
+        end
 
-    % Visualize.
-    %
-    % Use the Analyze:Line (luminance):/Horizontal menu item to select a line
-    % and see plot of luminance profile through the center.  Both spot and bg
-    % luminace come out as specified (remember that spot luminance is the sum
-    % of bg and specified spot luminances).
-    %
-    % Use the Plot:Radiance (photons) menu to select and ROI and plot mean
-    % spectrum in that region. Selecting background shows an equal energy
-    % spectrum, while selecting spot shows monochromatic spot on a relatively
-    % weak equal energy background. Not that an equal energy spectrum is not an
-    % equal quantal spectrum, though. You can verify equal energy by using the
-    % option that shows (energy) rather than photons.
-    % ieAddObject(rectScene);
-    % sceneWindow;
-%     pause(2);
-%     visualizeScene(rectScene, 'displayRadianceMaps', false);
-%     visualizeScene(rectSceneBG, 'displayRadianceMaps', false);
+        % Push adjusted image back into the scene. Note that default ISETBio scene
+        % is not represented at full double precision.  Setting bit depth to 64
+        % uses double precision which is what we want here.
+        rectScene = sceneSet(rectScene, 'bit depth', 64);
+        rectScene = sceneSet(rectScene,'photons',sceneRadiancePhotonsM2SrSecNm);
+        sceneRadianceCheck = sceneGet(rectScene,'photons');
+        if (max(abs(sceneRadianceCheck(:) - sceneRadiancePhotonsM2SrSecNm(:)))/mean(sceneRadiancePhotonsM2SrSecNm(:)) > 1e-10)
+            error('Failure in scene set');
+        end
 
+        % Push the background image back into the scene as well.
+        % Add background to spot image
+        for ww = 1:length(wls)
+            sceneRadiancePhotonsM2SrSecNmBG(:,:,ww) = bgRadiancePhotonsM2SrSecNm(ww);
+        end
+        rectSceneBG = sceneSet(rectSceneBG, 'bit depth', 64);
+        rectSceneBG = sceneSet(rectSceneBG, 'photons', sceneRadiancePhotonsM2SrSecNmBG);
 
-    % Compute the optical image
-    theOI = oiCompute(theOI, rectScene);
-    theOIBG = oiCompute(theOI, rectSceneBG);
-
-    % Visualize different aspects of the computed optical image
-%     visualizeOpticalImage(theOI, 'displayRetinalContrastProfiles', false,'displayRadianceMaps', false);
-
-    theConeMosaic.PSF = ConeResponse.psfDiffLmt(pupilDiameterMm);
-
-    coneExcitations(:,j,k) = theConeMosaic.computeWithScene(rectScene);
-    
-    % coneExcitations = theConeMosaic.compute(theOI);
-    % Visualize cone mosaic and its cone excitation responses
-    % theConeMosaic.plot('excitations', coneExcitations);
-    % visualizeOpticalImage(theConeMosaic.lastOI, 'displayRadianceMaps', true, ...
-    %                 'displayRetinalContrastProfiles', true);
-
-    % Visualize pattern of cone excitation
-    theConeMosaic.visualizeExcitation();
+        % Visualize.
+        %
+        % Use the Analyze:Line (luminance):/Horizontal menu item to select a line
+        % and see plot of luminance profile through the center.  Both spot and bg
+        % luminace come out as specified (remember that spot luminance is the sum
+        % of bg and specified spot luminances).
+        %
+        % Use the Plot:Radiance (photons) menu to select and ROI and plot mean
+        % spectrum in that region. Selecting background shows an equal energy
+        % spectrum, while selecting spot shows monochromatic spot on a relatively
+        % weak equal energy background. Not that an equal energy spectrum is not an
+        % equal quantal spectrum, though. You can verify equal energy by using the
+        % option that shows (energy) rather than photons.
+        % ieAddObject(rectScene);
+        % sceneWindow;
+        %     pause(2);
+        %     visualizeScene(rectScene, 'displayRadianceMaps', false);
+        %     visualizeScene(rectSceneBG, 'displayRadianceMaps', false);
 
 
-    coneExcitationsBG(:,j,k) = theConeMosaic.computeWithScene(rectSceneBG);
+        % Compute the optical image
+        theOI = oiCompute(theOI, rectScene);
+        theOIBG = oiCompute(theOI, rectSceneBG);
 
-    coneExcitationsDiff(:,j,k) = coneExcitations(:,j,k)-coneExcitationsBG(:,j,k);
-    kmeansIDX = kmeans(coneExcitationsDiff(:,j,k), 2);
+        % Visualize different aspects of the computed optical image
+        %     visualizeOpticalImage(theOI, 'displayRetinalContrastProfiles', false,'displayRadianceMaps', false);
 
-    % Visualize pattern of cone excitation
-    %     theConeMosaic.visualizeExcitation();
-    % Pre-allocate for data output
-    mConeSum(j,1,k)  = sum(coneExcitations(theConeMosaic.Mosaic.mConeIndices,j)-coneExcitationsBG(theConeMosaic.Mosaic.mConeIndices,j));
-    lConeSum(j,1,k) =  sum(coneExcitations(theConeMosaic.Mosaic.lConeIndices,j)-coneExcitationsBG(theConeMosaic.Mosaic.lConeIndices,j));
-    
-    xPos(j,1,k) = xLocs(j);
-    yPos(j,1,k) = yLocs(j);
+        theConeMosaic.PSF = ConeResponse.psfDiffLmt(pupilDiameterMm);
 
-%     % Find local cone ratio (within square region)
-%     idx = find(coneRelativeXPositionsArcmin > xPos(j)-(spotWidthMinutes/2) & coneRelativeXPositionsArcmin < xPos(j)+(spotWidthMinutes/2));
-%     idy = find(coneRelativeYPositionsArcmin > yPos(j)-(spotHeightMinutes/2) & coneRelativeYPositionsArcmin < yPos(j)+(spotHeightMinutes/2));
-%     id_stim = intersect(idx, idy);
+        coneExcitations(:,j,k) = theConeMosaic.computeWithScene(rectScene);
 
-    id_stim = find(kmeansIDX==2);
+        % coneExcitations = theConeMosaic.compute(theOI);
+        % Visualize cone mosaic and its cone excitation responses
+        % theConeMosaic.plot('excitations', coneExcitations);
+        % visualizeOpticalImage(theConeMosaic.lastOI, 'displayRadianceMaps', true, ...
+        %                 'displayRetinalContrastProfiles', true);
 
-    hold on;
-    plot(theConeMosaic.Mosaic.coneRFpositionsDegs(id_stim,1),theConeMosaic.Mosaic.coneRFpositionsDegs(id_stim,2), 'b*');
-    localNumLCones(j,1,k) = length(intersect(theConeMosaic.Mosaic.lConeIndices,id_stim));
-    localNumMCones(j,1,k) = length(intersect(theConeMosaic.Mosaic.mConeIndices,id_stim));
+        % Visualize pattern of cone excitation
+        theConeMosaic.visualizeExcitation();
 
-    close(gcf);
+
+        coneExcitationsBG(:,j,k) = theConeMosaic.computeWithScene(rectSceneBG);
+
+        coneExcitationsDiff(:,j,k) = coneExcitations(:,j,k)-coneExcitationsBG(:,j,k);
+        kmeansIDX = kmeans(coneExcitationsDiff(:,j,k), 2);
+
+        % Visualize pattern of cone excitation
+        %     theConeMosaic.visualizeExcitation();
+        % Pre-allocate for data output
+        mConeSum(j,1,k)  = sum(coneExcitations(theConeMosaic.Mosaic.mConeIndices,j,k)-coneExcitationsBG(theConeMosaic.Mosaic.mConeIndices,j,k));
+        lConeSum(j,1,k) =  sum(coneExcitations(theConeMosaic.Mosaic.lConeIndices,j,k)-coneExcitationsBG(theConeMosaic.Mosaic.lConeIndices,j,k));
+
+        xPos(j,1,k) = xLocs(j);
+        yPos(j,1,k) = yLocs(j);
+
+        %     % Find local cone ratio (within square region)
+        %     idx = find(coneRelativeXPositionsArcmin > xPos(j)-(spotWidthMinutes/2) & coneRelativeXPositionsArcmin < xPos(j)+(spotWidthMinutes/2));
+        %     idy = find(coneRelativeYPositionsArcmin > yPos(j)-(spotHeightMinutes/2) & coneRelativeYPositionsArcmin < yPos(j)+(spotHeightMinutes/2));
+        %     id_stim = intersect(idx, idy);
+
+        id_stim = find(kmeansIDX==2);
+
+        hold on;
+        plot(theConeMosaic.Mosaic.coneRFpositionsDegs(id_stim,1),theConeMosaic.Mosaic.coneRFpositionsDegs(id_stim,2), 'b*');
+        localNumLCones(j,1,k) = length(intersect(theConeMosaic.Mosaic.lConeIndices,id_stim));
+        localNumMCones(j,1,k) = length(intersect(theConeMosaic.Mosaic.mConeIndices,id_stim));
+
+        close(gcf);
 
     end
 end
 
 % figure, hold on
 % plot(lConeSum./mConeSum)
-% 
+%
 % hold on, plot(localNumLCones./localNumMCones)
