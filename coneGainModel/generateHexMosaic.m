@@ -1,4 +1,4 @@
-function [xValsVector, yValsVector] = generateHexMosaic(theConeMosaic, filterSizeMultiplier)
+function [xValsVector, yValsVector, rfSpacingDegs] = generateHexMosaic(theConeMosaic, filterSizeMultiplier)
 
 % This function will generate a haxagonal grid with element spacing defined
 % relative the cone spacing in an ISETBio cMosaic object.
@@ -30,22 +30,23 @@ end
 % Based on this number, what is the col (i.e. x) and row (i.e. y) spacing
 % of the hex array?
 colSpacing = filterSizeMultiplier.*mean(theConeMosaic.Mosaic.coneRFspacingsDegs);
+rfSpacingDegs = colSpacing;
 rowSpacing = (sqrt(3)/2).*colSpacing;
 
 % Get the mosaic center from theConeMosaic object
 yCenter = theConeMosaic.Mosaic.eccentricityDegs(2);
 xCenter = theConeMosaic.Mosaic.eccentricityDegs(1);
 
-% Initialize where the rows should stop and start; the initial grid will be
-% shifted to align with the center of the cone mosaic later.
-rowStart = yCenter - theConeMosaic.Mosaic.sizeDegs(2)./2;
-colStart = xCenter - theConeMosaic.Mosaic.sizeDegs(1)./2;
-
 % Compute the number of rows and colums, with a bit of padding; consider
 % how to handle post-receptoral summation units near the edge of the mosaic
 % sometime later
 numRows = round(theConeMosaic.Mosaic.sizeDegs(2)./rowSpacing) + 2;
 numCols = round(theConeMosaic.Mosaic.sizeDegs(1)./colSpacing) + 2;
+
+% Initialize where the rows should stop and start; the initial grid will be
+% shifted to align with the center of the cone mosaic later.
+rowStart = yCenter - theConeMosaic.Mosaic.sizeDegs(2)./2 - rowSpacing;
+colStart = xCenter - theConeMosaic.Mosaic.sizeDegs(1)./2 - colSpacing;
 
 % Generate a grid of X and Y values
 xValVectorSeed = colStart:colSpacing:(colSpacing*numCols)+colStart;
