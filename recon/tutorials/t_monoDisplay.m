@@ -143,4 +143,5 @@ meanLuminanceCdPerM2 = [];
     meanLuminanceCdPerM2, monoDisplay);
 stimulusScene = sceneSet(stimulusScene, 'fov', 0.5);
 visualizeScene(stimulusScene, 'displayRadianceMaps', false, 'avoidAutomaticRGBscaling', true);
+% save monoDisplay monoDisplay
 
