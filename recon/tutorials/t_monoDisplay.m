@@ -5,6 +5,9 @@
 % transformation from linear coordinates in a more standard diplsay
 % to this one.
 
+% History:
+%  10/12/22  Fix primary ordering, relative intensities
+
 %% Clear
 clear; close all;
 
@@ -73,9 +76,9 @@ end
 % that of corresponding original primary.
 redPowerUW = 6.087;
 greenPowerUW = 0.1131;
-spotWavelengthsNm = [440 543 680];
+spotWavelengthsNm = [680 543 440];
 spotFWHMsNm = [5 5 5];
-primaryTweakFactors = [2 0.95 16];
+primaryTweakFactors = [10 0.7 0.8];
 for ww = 1:length(spotWavelengthsNm)
     monoPDeviceRaw(:,ww) = normpdf(wls,spotWavelengthsNm(ww),FWHMToStd(spotFWHMsNm(ww)));
     monoPDevice(:,ww) = primaryTweakFactors(ww)*sum(origPDevice(:,ww))*monoPDeviceRaw(:,ww)/sum(monoPDeviceRaw(:,ww));
@@ -126,4 +129,18 @@ extraCalData = ptb.ExtraCalData;
 extraCalData.distance = displayGet(origDisplay,'distance');
 monoDisplay = ptb.GenerateIsetbioDisplayObjectFromPTBCalStruct('MonoPrimaries', monoCalStruct, extraCalData, false);
 monoDisplay  = rmfield(monoDisplay,'dixel');
+
+%% Visualize some images on display
+%
+% Use this to fuss with primary intensities so that white point is about
+% white, and equal mixture of red and green about yellow.
+nPixels = 100;
+theImageRGB(:,:,1) = 1*ones(nPixels,nPixels);
+theImageRGB(:,:,2) = 1*ones(nPixels,nPixels);
+theImageRGB(:,:,3) = 1*ones(nPixels,nPixels);
+meanLuminanceCdPerM2 = [];
+[stimulusScene, ~, stimulusImageLinear] = sceneFromFile(theImageRGB, 'rgb', ...
+    meanLuminanceCdPerM2, monoDisplay);
+stimulusScene = sceneSet(stimulusScene, 'fov', 0.5);
+visualizeScene(stimulusScene, 'displayRadianceMaps', false, 'avoidAutomaticRGBscaling', true);
 
