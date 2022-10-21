@@ -135,8 +135,8 @@ monoDisplay  = rmfield(monoDisplay,'dixel');
 % Use this to fuss with primary intensities so that white point is about
 % white, and equal mixture of red and green about yellow.
 nPixels = 100;
-theImageRGB(:,:,1) = 0.2*ones(nPixels,nPixels);
-theImageRGB(:,:,2) = 0.2*ones(nPixels,nPixels);
+theImageRGB(:,:,1) = 0.8*ones(nPixels,nPixels);
+theImageRGB(:,:,2) = 0.7*ones(nPixels,nPixels);
 theImageRGB(:,:,3) = 0.2*ones(nPixels,nPixels);
 meanLuminanceCdPerM2 = [];
 [stimulusScene, ~, stimulusImageLinear] = sceneFromFile(theImageRGB, 'rgb', ...
@@ -144,4 +144,4 @@ meanLuminanceCdPerM2 = [];
 stimulusScene = sceneSet(stimulusScene, 'fov', 0.5);
 visualizeScene(stimulusScene, 'displayRadianceMaps', false, 'avoidAutomaticRGBscaling', true);
 % save monoDisplay monoDisplay
-
+figure; imshow(theImageRGB);
