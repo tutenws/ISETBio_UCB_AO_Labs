@@ -135,9 +135,10 @@ monoDisplay  = rmfield(monoDisplay,'dixel');
 % Use this to fuss with primary intensities so that white point is about
 % white, and equal mixture of red and green about yellow.
 nPixels = 100;
-theImageRGB(:,:,1) = 0.8*ones(nPixels,nPixels);
-theImageRGB(:,:,2) = 0.7*ones(nPixels,nPixels);
-theImageRGB(:,:,3) = 0.2*ones(nPixels,nPixels);
+factor = 1.5;
+theImageRGB(:,:,1) = sqrt(factor*0.16)*ones(nPixels,nPixels);
+theImageRGB(:,:,2) = sqrt(factor*0.1225)*ones(nPixels,nPixels);
+theImageRGB(:,:,3) = sqrt(factor*0.0025)*ones(nPixels,nPixels);
 meanLuminanceCdPerM2 = [];
 [stimulusScene, ~, stimulusImageLinear] = sceneFromFile(theImageRGB, 'rgb', ...
     meanLuminanceCdPerM2, monoDisplay);
