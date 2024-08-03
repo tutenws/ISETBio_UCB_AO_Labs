@@ -1,4 +1,3 @@
-
 % t_monoDisplay
 %
 % Create a display with monochromatic primaries, and demonstrate
